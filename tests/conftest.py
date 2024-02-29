@@ -4,8 +4,8 @@ import yaml
 import pytest
 
 import cubed
-from cubed import config
-from cubed.spec import spec_from_config
+
+from .utils import spec_from_config_file
 
 from typing import Iterator
 
@@ -17,20 +17,6 @@ RUNTIME_CONFIGS = [
     #'configs/lithops_aws_1Z.yaml'
     #'configs/coiled_aws.yaml'
 ]
-
-
-def spec_from_config_file(filepath: str) -> cubed.Spec:
-    # from https://donfig.readthedocs.io/en/latest/configuration.html#downstream-libraries
-    # TODO shouldn't there be a way to do this in cubed? i.e. a classmethod on the Spec object?
-
-    fn = os.path.join(os.path.dirname(__file__), filepath)
-
-    with open(fn) as f:
-        defaults = yaml.safe_load(f)
-
-    config.update_defaults(defaults)
-
-    return spec_from_config(config)
 
 
 @pytest.fixture(params=RUNTIME_CONFIGS)
