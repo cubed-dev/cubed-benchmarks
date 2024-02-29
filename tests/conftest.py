@@ -19,18 +19,6 @@ RUNTIME_CONFIGS = [
 ]
 
 
-def run_benchmark(
-        result, 
-        executor, 
-    ):
-
-    # TODO: cubed.compute won't yet work on an xarray object (like dask.compute does) because xarray has magic dask dunder methods
-    cubed.compute(
-        result, 
-        executor=executor,
-    )
-
-
 def spec_from_config_file(filepath: str) -> cubed.Spec:
     # from https://donfig.readthedocs.io/en/latest/configuration.html#downstream-libraries
     # TODO shouldn't there be a way to do this in cubed? i.e. a classmethod on the Spec object?

@@ -3,7 +3,7 @@ import cubed.random
 import cubed.array_api as xp
 
 
-from conftest import run_benchmark
+from ..utils import run_benchmark
 
 
 def test_quad_means(runtime):
