@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+dependencies:
+
+  - python >=3.9
+  - pip
+  - cubed >=0.13.0
+  - sqlalchemy ==2.0.23

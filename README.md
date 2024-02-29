@@ -6,7 +6,8 @@ Set of Cubed benchmarks to run at scale on various executors.
 
 The `cubed benchmarks` test suite can be run locally with the following steps:
 
-1. Run tests with `python -m pytest tests`.
+1. Create a conda environment using `ci/environment.yml`
+2. Run tests with `python -m pytest tests`.
 
 ## Acknowledgements
 
