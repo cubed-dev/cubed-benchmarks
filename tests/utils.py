@@ -20,15 +20,20 @@ def spec_from_config_file(filepath: str) -> cubed.Spec:
     return spec_from_config(config)
 
 
-def run_benchmark(
+def run(
         result, 
-        executor, 
+        executor,
+        benchmarks,
     ):
 
-    # TODO: cubed.compute won't yet work on an xarray object (like dask.compute does) because xarray has magic dask dunder methods
-    cubed.compute(
-        result, 
-        executor=executor,
-    )
+    with benchmarks:
+
+        # TODO: cubed.compute won't yet work on an xarray object (like dask.compute does) because xarray has magic dask dunder methods
+        computed_result = cubed.compute(
+            result, 
+            executor=executor,
+        )
 
     # TODO clean up by deleting intermediate data here?
+        
+    return computed_result

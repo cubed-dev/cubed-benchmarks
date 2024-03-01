@@ -3,14 +3,13 @@ import cubed.random
 import cubed.array_api as xp
 
 
-from ..utils import run_benchmark
+from ..utils import run
 
 
 def test_quad_means(runtime, benchmark_time):
     # from cubed.tests.test_core.test_plan_quad_means
 
     spec = runtime
-    executor = spec.executor
 
     # TODO parametrize the scale through this parameter?
     t_length = 50
@@ -24,4 +23,6 @@ def test_quad_means(runtime, benchmark_time):
     result = xp.mean(uv, axis=0, split_every=10, use_new_impl=True)
 
     # time only the computing of the result
-    run_benchmark(result, executor)
+    computed_result = run(result, executor=spec.executor, benchmarks=benchmark_time)
+
+    # TODO check result is correct here
