@@ -14,6 +14,9 @@ import filelock
 import subprocess
 
 import cubed
+import xarray
+import cubed_xarray
+import lithops
 
 from .utils import spec_from_config_file
 
@@ -75,7 +78,7 @@ def benchmark_db_engine(pytestconfig, tmp_path_factory):
     if not pytestconfig.getoption("--benchmark"):
         yield
     else:
-        engine = sqlalchemy.create_engine(f"sqlite:///{DB_NAME}", future=True)
+        engine = sqlalchemy.create_engine(f"sqlite:///{DB_NAME}")
 
         # get the temp directory shared by all workers
         root_tmp_dir = tmp_path_factory.getbasetemp().parent
@@ -107,6 +110,10 @@ def benchmark_db_session(benchmark_db_engine):
         yield
     else:
         with Session(benchmark_db_engine, future=True) as session, session.begin():
+            
+            # This will create the test_run table if it doesn't exist
+            TestRun.__table__.create(bind=benchmark_db_engine, checkfirst=True)
+            
             yield session
 
 
@@ -133,9 +140,9 @@ def test_run_benchmark(benchmark_db_session, request, testrun_uid):
             originalname=request.node.originalname,
             path=str(request.node.path.relative_to(TEST_DIR)),
             cubed_version=cubed.__version__,
-            #cubed_xarray_version=cubed_xarray.__version__,
-            #xarray_version=xarray.__version__,
-            #lithops_version=lithops.__version__, 
+            cubed_xarray_version=cubed_xarray.__version__,
+            xarray_version=xarray.__version__,
+            lithops_version=lithops.__version__, 
             python_version=".".join(map(str, sys.version_info)),
             platform=sys.platform,
             ci_run_url=WORKFLOW_URL,

@@ -21,6 +21,7 @@ class TestRun(Base):
 
     # Runtime data
     cubed_version = Column(String, nullable=True)
+    xarray_version = Column(String, nullable=True)
     cubed_xarray_version = Column(String, nullable=True)
     lithops_version = Column(String, nullable=True)
     python_version = Column(String, nullable=True)
