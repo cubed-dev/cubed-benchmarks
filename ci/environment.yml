@@ -4,5 +4,6 @@ dependencies:
 
   - python >=3.9
   - pip
+  - pytest
   - cubed >=0.13.0
   - sqlalchemy ==2.0.23
