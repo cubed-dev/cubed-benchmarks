@@ -6,7 +6,7 @@ import cubed.array_api as xp
 from ..utils import run_benchmark
 
 
-def test_quad_means(runtime):
+def test_quad_means(runtime, benchmark_time):
     # from cubed.tests.test_core.test_plan_quad_means
 
     spec = runtime
