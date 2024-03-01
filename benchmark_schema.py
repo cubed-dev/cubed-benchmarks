@@ -37,3 +37,9 @@ class TestRun(Base):
     # Memory data
     average_memory = Column(Float, nullable=True)
     peak_memory = Column(Float, nullable=True)
+    projected_memory = Column(Float, nullable=True)
+
+    # Other diagnostics data
+    number_of_tasks_run = Column(Integer, nullable=True)
+    intermediate_data_stored = Column(Float, nullable=True)
+    container_seconds = Column(Float, nullable=True)
