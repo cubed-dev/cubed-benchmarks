@@ -18,7 +18,7 @@ import xarray
 import cubed_xarray
 import lithops
 
-from .utils import spec_from_config_file
+from .utils import spec_from_config_file, get_directory_size
 
 from benchmark_schema import TestRun
 
@@ -245,9 +245,45 @@ def benchmark_memory(test_run_benchmark):
 
 
 @pytest.fixture(scope="function")
+def benchmark_storage(test_run_benchmark):
+    """Benchmark the total amount of intermediate data written to storage.
+
+    Yields
+    ------
+    Context manager factory function which takes an instantiated cubed HistoryCallback object
+    as input. The context manager records number and cumulative duration of
+    tasks run while executing the ``with`` statement if run as part of a benchmark,
+    or does nothing otherwise.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_something(benchmark_storage):
+            history = cubed.extensions.history.HistoryCallback()
+            with benchmark_tasks(history):
+                cubed.compute(*arrs, callbacks=[history])
+    """
+
+    @contextlib.contextmanager
+    def _benchmark_storage(work_dir):
+        if not test_run_benchmark:
+            yield
+        else:
+            yield
+
+            stored_data_size = get_directory_size(work_dir)
+
+            test_run_benchmark.intermediate_data_stored = stored_data_size
+
+    yield _benchmark_storage
+
+
+@pytest.fixture(scope="function")
 def benchmark_all(
     benchmark_memory,
     benchmark_time,
+    benchmark_storage,
 ):
     """Benchmark all available metrics and extracts cluster information
 
@@ -271,13 +307,15 @@ def benchmark_all(
     --------
     benchmark_memory
     benchmark_time
+    benchmark_storage
     """
 
     @contextlib.contextmanager
-    def _benchmark_all(history):
+    def _benchmark_all(history, work_dir):
         with (
             benchmark_memory(history),
             benchmark_time,
+            benchmark_storage(work_dir)
         ):
             yield
 
