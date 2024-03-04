@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - s3fs
+  - pip:
+    - lithops[aws]
+

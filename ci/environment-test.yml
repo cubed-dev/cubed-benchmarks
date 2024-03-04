@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+dependencies:
+  # Testing dependencies
+  - filelock
+  - pytest
+  - pytest-xdist
