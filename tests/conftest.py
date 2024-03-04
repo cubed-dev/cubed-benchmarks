@@ -197,6 +197,92 @@ def benchmark_time(test_run_benchmark):
     return _benchmark_time()
 
 
+@pytest.fixture(scope="function")
+def benchmark_memory(test_run_benchmark):
+    """Benchmark the memory usage of executing some code.
+
+    Yields
+    ------
+    Context manager factory function which takes an instantiated cubed HistoryCallback object
+    as input. The context manager records peak and average memory usage of
+    executing the ``with`` statement if run as part of a benchmark,
+    or does nothing otherwise.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_something(benchmark_memory):
+            history = cubed.extensions.HistoryCallback()
+                with benchmark_memory(history):
+                    do_something()
+    """
+
+    @contextlib.contextmanager
+    def _benchmark_memory(history):
+        if not test_run_benchmark:
+            yield
+        else:
+            yield
+
+            import pandas as pd
+
+            # read off the memory values and write them into the database
+            plan_df = pd.DataFrame(history.plan)
+            events_df = pd.DataFrame(history.events)
+
+            events_df["peak_measured_mem_end_mb"] = (
+                events_df["peak_measured_mem_end"] / 1_000_000
+            )
+            plan_df["projected_mem_mb"] = plan_df["projected_mem"] / 1_000_000
+            # TODO average memory usage
+
+            test_run_benchmark.peak_memory = float(events_df["peak_measured_mem_end_mb"].max())
+            test_run_benchmark.projected_memory = float(plan_df["projected_mem_mb"].max())
+
+    yield _benchmark_memory
+
+
+@pytest.fixture(scope="function")
+def benchmark_all(
+    benchmark_memory,
+    benchmark_time,
+):
+    """Benchmark all available metrics and extracts cluster information
+
+    Yields
+    ------
+    Context manager factory function which takes an instantiated cubed HistoryCallback object
+    as input. The context manager records peak and average memory usage of
+    executing the ``with`` statement if run as part of a benchmark,
+    or does nothing otherwise.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_something(benchmark_memory):
+            history = cubed.extensions.HistoryCallback()
+                with benchmark_memory(history):
+                    do_something()
+    
+    See Also
+    --------
+    benchmark_memory
+    benchmark_time
+    """
+
+    @contextlib.contextmanager
+    def _benchmark_all(history):
+        with (
+            benchmark_memory(history),
+            benchmark_time,
+        ):
+            yield
+
+    yield _benchmark_all
+
+
 @pytest.fixture(params=RUNTIME_CONFIGS)
 def runtime(request) -> Iterator[cubed.Spec]:
     """

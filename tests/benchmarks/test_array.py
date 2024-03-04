@@ -6,7 +6,7 @@ import cubed.array_api as xp
 from ..utils import run
 
 
-def test_quad_means(runtime, benchmark_time):
+def test_quad_means(runtime, benchmark_all):
     # from cubed.tests.test_core.test_plan_quad_means
 
     spec = runtime
@@ -23,6 +23,6 @@ def test_quad_means(runtime, benchmark_time):
     result = xp.mean(uv, axis=0, split_every=10, use_new_impl=True)
 
     # time only the computing of the result
-    computed_result = run(result, executor=spec.executor, benchmarks=benchmark_time)
+    computed_result = run(result, executor=spec.executor, benchmarks=benchmark_all)
 
     # TODO check result is correct here

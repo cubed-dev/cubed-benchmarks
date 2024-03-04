@@ -2,6 +2,7 @@ import os
 import yaml
 
 import cubed
+from cubed.extensions.history import HistoryCallback
 from cubed.spec import spec_from_config
 from cubed import config
 
@@ -26,14 +27,17 @@ def run(
         benchmarks,
     ):
 
-    with benchmarks:
+    history = HistoryCallback()
+
+    with benchmarks(history):
 
         # TODO: cubed.compute won't yet work on an xarray object (like dask.compute does) because xarray has magic dask dunder methods
         computed_result = cubed.compute(
             result, 
             executor=executor,
+            callbacks=[history]
         )
 
     # TODO clean up by deleting intermediate data here?
-        
+
     return computed_result
