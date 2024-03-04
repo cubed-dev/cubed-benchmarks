@@ -252,8 +252,8 @@ def benchmark_tasks(test_run_benchmark):
     Yields
     ------
     Context manager factory function which takes an instantiated cubed HistoryCallback object
-    as input. The context manager records peak and average memory usage of
-    executing the ``with`` statement if run as part of a benchmark,
+    as input. The context manager records number and cumulative duration of
+    tasks run while executing the ``with`` statement if run as part of a benchmark,
     or does nothing otherwise.
 
     Example
@@ -262,7 +262,7 @@ def benchmark_tasks(test_run_benchmark):
 
         def test_something(benchmark_memory):
             history = cubed.extensions.history.HistoryCallback()
-            with benchmark_memory(history):
+            with benchmark_tasks(history):
                 cubed.compute(*arrs, callbacks=[history])
     """
 
@@ -280,7 +280,9 @@ def benchmark_tasks(test_run_benchmark):
             events_df = pd.DataFrame(history.events)
 
             test_run_benchmark.number_of_tasks_run = int(plan_df["num_tasks"].sum())
-            #test_run_benchmark.container_seconds = ...
+            
+            function_durations = events_df['function_end_tstamp'] - events_df['function_start_tstamp']
+            test_run_benchmark.container_seconds = float(function_durations.sum())
 
     yield _benchmark_tasks
 
@@ -291,13 +293,13 @@ def benchmark_all(
     benchmark_tasks,
     benchmark_time,
 ):
-    """Benchmark all available metrics and extracts cluster information
+    """Benchmark all available metrics
 
     Yields
     ------
     Context manager factory function which takes an instantiated cubed HistoryCallback object
-    as input. The context manager records peak and average memory usage of
-    executing the ``with`` statement if run as part of a benchmark,
+    as input. The context manager records peak and average memory usage, overall duration, 
+    number and cumulative duration of tasks run when executing the ``with`` statement if run as part of a benchmark,
     or does nothing otherwise.
 
     Example
@@ -312,6 +314,7 @@ def benchmark_all(
     See Also
     --------
     benchmark_memory
+    benchmark_tasks
     benchmark_time
     """
 
