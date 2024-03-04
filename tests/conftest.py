@@ -232,15 +232,15 @@ def benchmark_memory(test_run_benchmark):
             plan_df = pd.DataFrame(history.plan)
             events_df = pd.DataFrame(history.events)
 
+            plan_df["projected_mem_mb"] = plan_df["projected_mem"] / 1_000_000
             events_df["peak_measured_mem_end_mb"] = (
                 events_df["peak_measured_mem_end"] / 1_000_000
             )
-            plan_df["projected_mem_mb"] = plan_df["projected_mem"] / 1_000_000
-            # TODO average memory usage
-
-            test_run_benchmark.peak_memory = float(events_df["peak_measured_mem_end_mb"].max())
+            
             test_run_benchmark.projected_memory = float(plan_df["projected_mem_mb"].max())
-
+            test_run_benchmark.peak_memory = float(events_df["peak_measured_mem_end_mb"].max())
+            test_run_benchmark.average_memory = float(events_df["peak_measured_mem_end_mb"].mean())
+            
     yield _benchmark_memory
 
 
