@@ -214,9 +214,9 @@ def benchmark_memory(test_run_benchmark):
     .. code-block:: python
 
         def test_something(benchmark_memory):
-            history = cubed.extensions.HistoryCallback()
-                with benchmark_memory(history):
-                    do_something()
+            history = cubed.extensions.history.HistoryCallback()
+            with benchmark_memory(history):
+                cubed.compute(*arrs, callbacks=[history])
     """
 
     @contextlib.contextmanager
@@ -262,10 +262,10 @@ def benchmark_all(
     -------
     .. code-block:: python
 
-        def test_something(benchmark_memory):
-            history = cubed.extensions.HistoryCallback()
-                with benchmark_memory(history):
-                    do_something()
+        def test_something(benchmark_all):
+            history = cubed.extensions.history.HistoryCallback()
+            with benchmark_all(history):
+                cubed.compute(*arrs, callbacks=[history])
     
     See Also
     --------
