@@ -260,7 +260,7 @@ def benchmark_tasks(test_run_benchmark):
     -------
     .. code-block:: python
 
-        def test_something(benchmark_memory):
+        def test_something(benchmark_tasks):
             history = cubed.extensions.history.HistoryCallback()
             with benchmark_tasks(history):
                 cubed.compute(*arrs, callbacks=[history])
