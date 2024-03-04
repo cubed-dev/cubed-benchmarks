@@ -1,9 +1,10 @@
 channels:
   - conda-forge
 dependencies:
-
   - python >=3.9,<=3.11
   - pip
-  - pytest
-  - cubed >=0.13.0
+  - cubed-xarray
+  - xarray ==2023.10.0
   - sqlalchemy ==2.0.23
+  - pip:
+    - cubed[diagnostics] >=0.13.0
