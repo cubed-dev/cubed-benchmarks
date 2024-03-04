@@ -236,7 +236,7 @@ def benchmark_memory(test_run_benchmark):
             events_df["peak_measured_mem_end_mb"] = (
                 events_df["peak_measured_mem_end"] / 1_000_000
             )
-            
+
             test_run_benchmark.projected_memory = float(plan_df["projected_mem_mb"].max())
             test_run_benchmark.peak_memory = float(events_df["peak_measured_mem_end_mb"].max())
             test_run_benchmark.average_memory = float(events_df["peak_measured_mem_end_mb"].mean())
@@ -244,9 +244,51 @@ def benchmark_memory(test_run_benchmark):
     yield _benchmark_memory
 
 
+
+@pytest.fixture(scope="function")
+def benchmark_tasks(test_run_benchmark):
+    """Benchmark the number and cumulative duration of tasks run.
+
+    Yields
+    ------
+    Context manager factory function which takes an instantiated cubed HistoryCallback object
+    as input. The context manager records peak and average memory usage of
+    executing the ``with`` statement if run as part of a benchmark,
+    or does nothing otherwise.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_something(benchmark_memory):
+            history = cubed.extensions.history.HistoryCallback()
+            with benchmark_memory(history):
+                cubed.compute(*arrs, callbacks=[history])
+    """
+
+    @contextlib.contextmanager
+    def _benchmark_tasks(history):
+        if not test_run_benchmark:
+            yield
+        else:
+            yield
+
+            import pandas as pd
+
+            # read off the memory values and write them into the database
+            plan_df = pd.DataFrame(history.plan)
+            events_df = pd.DataFrame(history.events)
+
+            test_run_benchmark.number_of_tasks_run = int(plan_df["num_tasks"].sum())
+            #test_run_benchmark.container_seconds = ...
+
+    yield _benchmark_tasks
+
+
 @pytest.fixture(scope="function")
 def benchmark_all(
     benchmark_memory,
+    benchmark_tasks,
     benchmark_time,
 ):
     """Benchmark all available metrics and extracts cluster information
@@ -277,6 +319,7 @@ def benchmark_all(
     def _benchmark_all(history):
         with (
             benchmark_memory(history),
+            benchmark_tasks(history),
             benchmark_time,
         ):
             yield
