@@ -28,9 +28,11 @@ def run(
         **kwargs
     ):
 
-    callbacks = kwargs.get('callbacks', [])
+    # add the history callback to any other callback already passed
     history = HistoryCallback()
+    callbacks = kwargs.get('callbacks', [])
     callbacks.append(history)
+    kwargs['callbacks'] = callbacks
 
     with benchmarks(history):
 
