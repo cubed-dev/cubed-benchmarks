@@ -24,14 +24,14 @@ def run(
         result, 
         executor,
         benchmarks,
+        **kwargs
     ):
 
     with benchmarks:
 
-        # TODO: cubed.compute won't yet work on an xarray object (like dask.compute does) because xarray has magic dask dunder methods
-        computed_result = cubed.compute(
-            result, 
+        computed_result = result.compute(
             executor=executor,
+            **kwargs
         )
 
     # TODO clean up by deleting intermediate data here?
