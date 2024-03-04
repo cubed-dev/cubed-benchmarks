@@ -21,9 +21,33 @@ def spec_from_config_file(filepath: str) -> cubed.Spec:
     return spec_from_config(config)
 
 
+def get_directory_size(work_dir: str) -> float:
+    """Get the size of any data written to the given directory (local or remote)."""
+
+    import fsspec
+
+    total_size = 0
+
+    if work_dir.startswith('s3://'):
+        fs = fsspec.filesystem('s3')
+    else:
+        fs = fsspec.filesystem('file')
+
+    # List all files and subdirectories in the directory
+    contents = fs.glob(f'{work_dir}/**', detail=True)
+
+    for item in contents:
+        if item['type'] == 'file':
+            # If it's a file, add its size to the total
+            total_size += item['size']
+
+    return total_size
+
+
 def run(
         result, 
         executor,
+        spec,
         benchmarks,
         **kwargs
     ):
@@ -34,7 +58,7 @@ def run(
     callbacks.append(history)
     kwargs['callbacks'] = callbacks
 
-    with benchmarks(history):
+    with benchmarks(history, spec.work_dir):
 
         computed_result = result.compute(
             executor=executor,
