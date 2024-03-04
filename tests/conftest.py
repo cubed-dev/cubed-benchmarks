@@ -25,6 +25,7 @@ from benchmark_schema import TestRun
 
 RUNTIME_CONFIGS = [
     'configs/local_single-threaded.yaml',
+    #'configs/local_async.yaml',
     #'configs/lithops_gcf.yaml',
     #'configs/lithops_aws.yaml',
     #'configs/lithops_aws_1Z.yaml',

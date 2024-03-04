@@ -9,7 +9,8 @@ import cubed
 import cubed.random
 from cubed.core.optimization import multiple_inputs_optimize_dag
 from cubed.extensions.rich import RichProgressBar
-from cubed.runtime.executors.python import PythonDagExecutor
+from cubed.runtime.executors.python import PythonDagExecutor 
+from cubed.runtime.executors.python_async import AsyncPythonDagExecutor
 
 from ..utils import run
 
@@ -18,7 +19,7 @@ from ..utils import run
 def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
     spec = runtime
 
-    if isinstance(spec.executor, PythonDagExecutor) and t_length > 50:
+    if isinstance(spec.executor, (PythonDagExecutor, AsyncPythonDagExecutor)) and t_length > 50:
         pytest.skip(f"Don't run large computation on {type(spec.executor)}")
 
     # set the random seed to ensure deterministic results
