@@ -70,6 +70,7 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
     computed_result = run(
         result,
         executor=spec.executor,
+        spec=spec,
         benchmarks=benchmark_all,
         optimize_function=opt_fn,
         compute_arrays_in_parallel=True,
