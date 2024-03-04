@@ -2,6 +2,7 @@ import os
 import yaml
 
 import cubed
+from cubed.extensions.history import HistoryCallback
 from cubed.spec import spec_from_config
 from cubed import config
 
@@ -27,13 +28,19 @@ def run(
         **kwargs
     ):
 
-    with benchmarks:
+    # add the history callback to any other callback already passed
+    history = HistoryCallback()
+    callbacks = kwargs.get('callbacks', [])
+    callbacks.append(history)
+    kwargs['callbacks'] = callbacks
+
+    with benchmarks(history):
 
         computed_result = result.compute(
             executor=executor,
-            **kwargs
+            **kwargs,
         )
 
     # TODO clean up by deleting intermediate data here?
-        
+
     return computed_result
