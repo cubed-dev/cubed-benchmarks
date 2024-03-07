@@ -1,0 +1,75 @@
+name: Benchmarks
+
+on:
+  pull_request:
+  schedule:
+    # Mon-Fri at 04:39 UTC, see https://crontab.guru/
+    - cron: "39 4 * * 1-5"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  # Required shell entrypoint to have properly activated conda environments
+  run:
+    shell: bash -l {0}
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.11"]
+        extra-env: [""]
+        cubed-config: [tests/configs/local_single-threaded.yaml]
+        name_prefix: [tests]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          use-mamba: true
+          condarc-file: ci/condarc
+          python-version: ${{ matrix.python_version }}
+          environment-file: ci/environment.yml
+
+      - name: Add extra packages to environment
+        if: ${{ matrix.extra-env != '' }}
+        run: mamba env update --file ${{ matrix.extra-env }}
+
+      - name: Add test dependencies
+        run: mamba env update --file ci/environment-test.yml
+
+      - name: Dump environment
+        run: |
+          # For debugging
+          echo -e "--\n--Conda Environment (re-create this with \`conda env create --name <name> -f <output_file>\`)\n--"
+          mamba env export | grep -E -v '^prefix:.*$'
+
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+
+      - name: Run benchmarks
+        env:
+          CUBED_CONFIG: ${{ matrix.cubed-config }}
+          DB_NAME: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
+        run: |
+          pytest --benchmark --basetemp=pytest-temp
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}
+          path: |
+            ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
+            pytest-temp/
+            mamba_env_export.yml
