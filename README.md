@@ -6,10 +6,10 @@ Set of Cubed benchmarks to run at scale on various executors.
 
 The `cubed benchmarks` test suite can be run locally with the following steps:
 
-1. Create a conda environment using `mamba env create -n test-env -f ci/environment.yaml`
+1. Create a conda environment using `mamba env create -n test-env -f ci/environment.yml`
 2. Activate the environment with `conda activate test-env`
 3. Add test packages with `mamba env update -f ci/environment-test.yml`
-4. Run tests with `python -m pytest tests`
+4. Run tests with `CUBED_CONFIG=tests/configs/local_single-threaded.yaml pytest`
 
 ## Benchmarking
 
@@ -36,6 +36,7 @@ You can compare with historical data by downloading the global database from S3 
 
 ```bash
 aws s3 cp s3://cubed-runtime-ci/benchmarks/benchmark.db ./benchmark.db
+export CUBED_CONFIG=...
 pytest --benchmark
 ```
 
