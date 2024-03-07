@@ -16,9 +16,13 @@ import subprocess
 import cubed
 import xarray
 import cubed_xarray
-import lithops
 
-from .utils import spec_from_config_file
+try:
+    import lithops
+except ImportError:
+    lithops = None
+
+from cubed import config
 
 from benchmark_schema import TestRun
 
@@ -143,7 +147,7 @@ def test_run_benchmark(benchmark_db_session, request, testrun_uid):
             cubed_version=cubed.__version__,
             cubed_xarray_version=cubed_xarray.__version__,
             xarray_version=xarray.__version__,
-            lithops_version=lithops.__version__, 
+            lithops_version=lithops.__version__ if lithops else None, 
             python_version=".".join(map(str, sys.version_info)),
             platform=sys.platform,
             ci_run_url=WORKFLOW_URL,
@@ -330,11 +334,6 @@ def benchmark_all(
     yield _benchmark_all
 
 
-@pytest.fixture(params=RUNTIME_CONFIGS)
-def runtime(request) -> Iterator[cubed.Spec]:
-    """
-    Yields a cubed.Spec for each .yaml file in the /configs/ directory, 
-    so any test parametrized with this fixture will run for all executors.
-    """
-    config_filepath = request.param
-    yield spec_from_config_file(config_filepath)
+@pytest.fixture()
+def runtime() -> cubed.Spec:
+    return cubed.spec.spec_from_config(config)
