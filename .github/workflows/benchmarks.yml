@@ -27,10 +27,27 @@ jobs:
         extra-env: [""]
         cubed-config: [tests/configs/local_single-threaded.yaml]
         name_prefix: [tests]
+        include:
+          - os: "ubuntu-latest"
+            python-version: "3.11"
+            extra-env: ci/environment-lithops-aws.yml
+            cubed-config: tests/configs/lithops_aws.yaml
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Copy lithops configuration template
+        run: |
+          cp $GITHUB_WORKSPACE/.github/workflows/.lithops_config_aws.template $GITHUB_WORKSPACE/.github/workflows/.lithops_config_aws
+
+      - name: Configure lithops
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ${{ github.workspace }}/.github/workflows/.lithops_config_aws
+        env:
+          aws.access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws.secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Set up environment
         uses: conda-incubator/setup-miniconda@v2
@@ -59,8 +76,11 @@ jobs:
 
       - name: Run benchmarks
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           CUBED_CONFIG: ${{ matrix.cubed-config }}
           DB_NAME: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
+          LITHOPS_CONFIG_FILE: ${{ github.workspace }}/.github/workflows/.lithops_config_aws
         run: |
           pytest --benchmark --basetemp=pytest-temp
 
