@@ -1,7 +1,6 @@
 name: Benchmarks
 
 on:
-  pull_request:
   schedule:
     # Mon-Fri at 04:39 UTC, see https://crontab.guru/
     - cron: "39 4 * * 1-5"

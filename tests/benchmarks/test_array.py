@@ -15,7 +15,7 @@ from cubed.runtime.executors.python_async import AsyncPythonDagExecutor
 from ..utils import run
 
 
-@pytest.mark.parametrize("t_length", [50])
+@pytest.mark.parametrize("t_length", [50, 500, 5000])
 def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
     spec = runtime
 
