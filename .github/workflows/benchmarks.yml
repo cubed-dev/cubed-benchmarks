@@ -25,28 +25,50 @@ jobs:
         python-version: ["3.11"]
         extra-env: [""]
         cubed-config: [tests/configs/local_single-threaded.yaml]
+        lithops-config: [""]
         name_prefix: [tests]
         include:
           - os: "ubuntu-latest"
             python-version: "3.11"
             extra-env: ci/environment-lithops-aws.yml
             cubed-config: tests/configs/lithops_aws.yaml
+            lithops-config: .github/workflows/.lithops_config_aws
+          - os: "ubuntu-latest"
+            python-version: "3.11"
+            extra-env: ci/environment-lithops-gcp.yml
+            cubed-config: tests/configs/lithops_gcp.yaml
+            lithops-config: .github/workflows/.lithops_config_gcp
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy lithops configuration template
+      - name: Copy lithops configuration templates
         run: |
           cp $GITHUB_WORKSPACE/.github/workflows/.lithops_config_aws.template $GITHUB_WORKSPACE/.github/workflows/.lithops_config_aws
+          cp $GITHUB_WORKSPACE/.github/workflows/.lithops_config_gcp.template $GITHUB_WORKSPACE/.github/workflows/.lithops_config_gcp
 
-      - name: Configure lithops
+      - name: Google auth
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+          create_credentials_file: true
+
+      - name: Configure lithops AWS
         uses: microsoft/variable-substitution@v1
         with:
           files: ${{ github.workspace }}/.github/workflows/.lithops_config_aws
         env:
           aws.access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws.secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Configure lithops GCP
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ${{ github.workspace }}/.github/workflows/.lithops_config_gcp
+        env:
+          gcp.credentials_path: ${{ steps.auth.outputs.credentials_file_path }}
 
       - name: Set up environment
         uses: conda-incubator/setup-miniconda@v2
@@ -79,7 +101,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           CUBED_CONFIG: ${{ matrix.cubed-config }}
           DB_NAME: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
-          LITHOPS_CONFIG_FILE: ${{ github.workspace }}/.github/workflows/.lithops_config_aws
+          LITHOPS_CONFIG_FILE: ${{ github.workspace }}/${{ matrix.lithops-config }}
         run: |
           pytest --benchmark --basetemp=pytest-temp
 
