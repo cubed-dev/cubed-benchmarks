@@ -4,7 +4,7 @@ dependencies:
   - python >=3.9,<=3.11
   - pip
   - cubed-xarray
-  - xarray ==2023.10.0
+  - xarray
   - sqlalchemy ==2.0.23
   - pip:
     - cubed[diagnostics] >=0.13.0
