@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   test:
+    name: ${{ matrix.name_prefix }} ${{ matrix.os }} py${{ matrix.python_version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -26,18 +27,20 @@ jobs:
         extra-env: [""]
         cubed-config: [tests/configs/local_single-threaded.yaml]
         lithops-config: [""]
-        name_prefix: [tests]
+        name_prefix: [local]
         include:
           - os: "ubuntu-latest"
             python-version: "3.11"
             extra-env: ci/environment-lithops-aws.yml
             cubed-config: tests/configs/lithops_aws.yaml
             lithops-config: .github/workflows/.lithops_config_aws
+            name_prefix: lithops-aws
           - os: "ubuntu-latest"
             python-version: "3.11"
             extra-env: ci/environment-lithops-gcp.yml
             cubed-config: tests/configs/lithops_gcp.yaml
             lithops-config: .github/workflows/.lithops_config_gcp
+            name_prefix: lithops-gcp
 
     steps:
       - name: Checkout
