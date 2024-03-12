@@ -27,16 +27,6 @@ from cubed import config
 from benchmark_schema import TestRun
 
 
-RUNTIME_CONFIGS = [
-    'configs/local_single-threaded.yaml',
-    #'configs/local_async.yaml',
-    #'configs/lithops_gcp.yaml',
-    #'configs/lithops_aws.yaml',
-    #'configs/lithops_aws_1Z.yaml',
-    #'configs/coiled_aws.yaml',
-]
-
-
 TEST_DIR = pathlib.Path("./tests").absolute()
 
 
@@ -150,6 +140,7 @@ def test_run_benchmark(benchmark_db_session, request, testrun_uid):
             lithops_version=lithops.__version__ if lithops else None, 
             python_version=".".join(map(str, sys.version_info)),
             platform=sys.platform,
+            cubed_config_file=os.getenv("CUBED_CONFIG"),
             ci_run_url=WORKFLOW_URL,
         )
         yield run
