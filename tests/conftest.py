@@ -140,7 +140,7 @@ def test_run_benchmark(benchmark_db_session, request, testrun_uid):
             lithops_version=lithops.__version__ if lithops else None, 
             python_version=".".join(map(str, sys.version_info)),
             platform=sys.platform,
-            cubed_config_file=os.getenv("CUBED_CONFIG"),
+            name_prefix=os.getenv("NAME_PREFIX"),
             ci_run_url=WORKFLOW_URL,
         )
         yield run

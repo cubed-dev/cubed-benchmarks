@@ -26,7 +26,7 @@ class TestRun(Base):
     lithops_version = Column(String, nullable=True)
     python_version = Column(String, nullable=True)
     platform = Column(String, nullable=True)
-    cubed_config_file = Column(String, nullable=True)
+    name_prefix = Column(String, nullable=True)
 
     # CI runner data
     ci_run_url = Column(String, nullable=True)

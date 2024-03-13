@@ -27,7 +27,7 @@ jobs:
         extra-env: [""]
         cubed-config: [tests/configs/local_single-threaded.yaml]
         lithops-config: [""]
-        name_prefix: [local]
+        name_prefix: [single-threaded]
         include:
           - os: "ubuntu-latest"
             python-version: "3.11"
@@ -105,6 +105,7 @@ jobs:
           CUBED_CONFIG: ${{ matrix.cubed-config }}
           DB_NAME: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
           LITHOPS_CONFIG_FILE: ${{ github.workspace }}/${{ matrix.lithops-config }}
+          NAME_PREFIX: ${{ matrix.name_prefix }}
         run: |
           pytest --benchmark --basetemp=pytest-temp
 
