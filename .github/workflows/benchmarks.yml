@@ -115,5 +115,6 @@ jobs:
           name: ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}
           path: |
             ${{ matrix.name_prefix }}-${{ matrix.os }}-py${{ matrix.python_version }}.db
+            history/
             pytest-temp/
             mamba_env_export.yml

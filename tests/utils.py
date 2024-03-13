@@ -3,6 +3,7 @@ import yaml
 
 import cubed
 from cubed.extensions.history import HistoryCallback
+from cubed.extensions.timeline import TimelineVisualizationCallback
 from cubed.spec import spec_from_config
 from cubed import config
 
@@ -28,10 +29,12 @@ def run(
         **kwargs
     ):
 
-    # add the history callback to any other callback already passed
+    # add the history and timeline callbacks to any other callbacks already passed
     history = HistoryCallback()
+    timeline_viz = TimelineVisualizationCallback()
     callbacks = kwargs.get('callbacks', [])
     callbacks.append(history)
+    callbacks.append(timeline_viz)
     kwargs['callbacks'] = callbacks
 
     with benchmarks(history):
