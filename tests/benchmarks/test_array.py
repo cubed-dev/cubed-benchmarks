@@ -7,7 +7,7 @@ import xarray as xr
 
 import cubed
 import cubed.random
-from cubed.core.optimization import multiple_inputs_optimize_dag
+from cubed.core.optimization import multiple_inputs_optimize_dag, simple_optimize_dag
 from cubed.extensions.rich import RichProgressBar
 from cubed.runtime.executors.python import PythonDagExecutor 
 from cubed.runtime.executors.python_async import AsyncPythonDagExecutor
@@ -15,8 +15,9 @@ from cubed.runtime.executors.python_async import AsyncPythonDagExecutor
 from ..utils import run
 
 
+@pytest.mark.parametrize("optimizer", ["old-optimizer", "new-optimizer"])
 @pytest.mark.parametrize("t_length", [50, 500, 5000])
-def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
+def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_length):
     spec = runtime
 
     if isinstance(spec.executor, (PythonDagExecutor, AsyncPythonDagExecutor)) and t_length > 50:
@@ -51,7 +52,13 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
         "time", skipna=False, use_new_impl=True, split_every=10
     )
 
-    opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=40)
+    if optimizer == "new-optimizer":
+        opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=40)
+        compute_arrays_in_parallel = True
+    else:
+        opt_fn = simple_optimize_dag
+        compute_arrays_in_parallel = False
+
 
     cubed.visualize(
         *(result[var].data for var in ("anom_u", "anom_v", "uv")),
@@ -72,7 +79,7 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length):
         executor=spec.executor,
         benchmarks=benchmark_all,
         optimize_function=opt_fn,
-        compute_arrays_in_parallel=True,
+        compute_arrays_in_parallel=compute_arrays_in_parallel,
         callbacks=[RichProgressBar()],
     )
 
