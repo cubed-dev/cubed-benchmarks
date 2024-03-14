@@ -16,7 +16,7 @@ defaults:
     shell: bash -l {0}
 
 jobs:
-  test:
+  tests:
     name: ${{ matrix.name_prefix }} ${{ matrix.os }} py${{ matrix.python_version }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -118,3 +118,59 @@ jobs:
             history/
             pytest-temp/
             mamba_env_export.yml
+
+  process-results:
+    needs: tests
+    name: Combine separate benchmark results
+    if: always() && github.repository == 'cubed-dev/benchmarks'
+    runs-on: ubuntu-latest
+    concurrency:
+      # Fairly strict concurrency rule to avoid stepping on benchmark db.
+      group: process-benchmarks
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install alembic
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: benchmarks
+
+      - name: Download benchmark db
+        env:
+          AWS_ACCESS_KEY_ID: ${{ ssecrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-2 # this is needed for boto for some reason
+          DB_NAME: benchmark.db
+        run: |
+          aws s3 cp s3://cubed-runtime-ci/benchmarks/$DB_NAME . || true
+
+      - name: Combine benchmarks
+        run: |
+          ls -lhR benchmarks
+          bash ci/scripts/combine-dbs.sh
+
+      - name: Upload benchmark db
+        if: always() && github.ref == 'refs/heads/main' && github.repository == 'cubed-dev/benchmarks'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-2 # this is needed for boto for some reason
+          DB_NAME: benchmark.db
+        run: |
+          aws s3 cp $DB_NAME s3://cubed-runtime-ci/benchmarks/
+
+      - name: Upload benchmark results as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark
+          path: benchmark.db
