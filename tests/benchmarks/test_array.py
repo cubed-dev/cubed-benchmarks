@@ -48,6 +48,7 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
     )
     quad = ds**2
     quad["uv"] = ds.anom_u * ds.anom_v
+    print(quad)
     result = quad.mean(
         "time", skipna=False, use_new_impl=True, split_every=10
     )
