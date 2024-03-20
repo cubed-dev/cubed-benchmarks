@@ -1,6 +1,7 @@
 import contextlib
 import time
 import datetime
+import logging
 import os
 import pathlib
 import sys
@@ -26,6 +27,8 @@ from cubed import config
 
 from benchmark_schema import TestRun
 
+# suppress harmless connection pool warnings from lithops
+logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 
 TEST_DIR = pathlib.Path("./tests").absolute()
 
