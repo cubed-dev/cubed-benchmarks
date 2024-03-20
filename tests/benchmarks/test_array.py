@@ -54,7 +54,7 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
     )
 
     if optimizer == "new-optimizer":
-        opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=40)
+        opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=20)
         compute_arrays_in_parallel = True
     else:
         opt_fn = simple_optimize_dag
