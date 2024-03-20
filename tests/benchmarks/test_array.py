@@ -15,9 +15,21 @@ from cubed.runtime.executors.python_async import AsyncPythonDagExecutor
 from ..utils import run
 
 
-@pytest.mark.parametrize("optimizer", ["old-optimizer", "new-optimizer"])
-@pytest.mark.parametrize("t_length", [50, 500, 5000])
-def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_length):
+@pytest.mark.parametrize(
+    "t_length, optimizer, compute_arrays_in_parallel",
+    [
+        # (50, "old-optimizer", False),
+        # (50, "new-optimizer", True),
+        # (500, "old-optimizer", False),
+        # (500, "new-optimizer", True),
+        # (5000, "old-optimizer", False),
+        # (5000, "new-optimizer", True),
+        (50000, "old-optimizer", False),
+        (50000, "new-optimizer", False),
+        (50000, "new-optimizer", True),
+    ],
+)
+def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, t_length, optimizer, compute_arrays_in_parallel):
     spec = runtime
 
     if isinstance(spec.executor, (PythonDagExecutor, AsyncPythonDagExecutor)) and t_length > 50:
@@ -34,16 +46,12 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
     cubed.store(arrays, paths, compute_arrays_in_parallel=True, callbacks=[RichProgressBar()])
 
     # lazily define computation
+    u = cubed.from_zarr(paths[0], spec=spec)
+    v = cubed.from_zarr(paths[1], spec=spec)
     ds = xr.Dataset(
         dict(
-            anom_u=(
-                ["time", "face", "j", "i"],
-                cubed.from_zarr(paths[0], spec=spec),
-            ),
-            anom_v=(
-                ["time", "face", "j", "i"],
-                cubed.from_zarr(paths[1], spec=spec),
-            ),
+            anom_u=(["time", "face", "j", "i"], u),
+            anom_v=(["time", "face", "j", "i"], v),
         )
     )
     quad = ds**2
@@ -55,10 +63,8 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
 
     if optimizer == "new-optimizer":
         opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=20)
-        compute_arrays_in_parallel = True
     else:
         opt_fn = simple_optimize_dag
-        compute_arrays_in_parallel = False
 
 
     cubed.visualize(
