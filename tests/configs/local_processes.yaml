@@ -1,0 +1,4 @@
+spec:
+  work_dir: "temp/"
+  allowed_mem: "2GB"
+  executor_name: "processes"
