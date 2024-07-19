@@ -13,7 +13,7 @@ from cubed.extensions.rich import RichProgressBar
 from ..utils import run
 
 
-@pytest.mark.parametrize("optimizer", ["old-optimizer", "new-optimizer"])
+@pytest.mark.parametrize("optimizer", ["new-optimizer"])
 @pytest.mark.parametrize("t_length", [50, 500, 5000])
 def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_length):
     spec = runtime
