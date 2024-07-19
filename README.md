@@ -34,11 +34,32 @@ the data will be appended to the database.
 
 You can compare with historical data by downloading the global database from S3 first:
 
-```bash
+```shell
 aws s3 cp s3://cubed-runtime-ci/benchmarks/benchmark.db ./benchmark.db
 export CUBED_CONFIG=...
 pytest --benchmark
 ```
+
+### Running the benchmarks locally using the `processes` executor
+
+The `processes` executor uses all the cores on the local machine to run. These
+benchmarks can be run locally on a machine with multiple cores (they are not
+run in CI since CI hosts typically don't have many cores).
+
+```shell
+export CUBED_CONFIG=tests/configs/local_processes.yaml
+pytest --benchmark
+```
+
+### Inspecting the benchmarks database
+
+There are many ways of doing this, but here is a simple one using DuckDB:
+
+```
+> duckdb benchmark.db
+select name, call_outcome, start, duration, name_prefix from test_run;
+```
+
 
 ## Acknowledgements
 
