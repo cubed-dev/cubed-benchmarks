@@ -212,7 +212,7 @@ def benchmark_memory(test_run_benchmark):
     .. code-block:: python
 
         def test_something(benchmark_memory):
-            history = cubed.extensions.history.HistoryCallback()
+            history = cubed.diagnostics.history.HistoryCallback()
             with benchmark_memory(history):
                 cubed.compute(*arrs, callbacks=[history])
     """
@@ -259,7 +259,7 @@ def benchmark_tasks(test_run_benchmark):
     .. code-block:: python
 
         def test_something(benchmark_tasks):
-            history = cubed.extensions.history.HistoryCallback()
+            history = cubed.diagnostics.history.HistoryCallback()
             with benchmark_tasks(history):
                 cubed.compute(*arrs, callbacks=[history])
     """
@@ -305,7 +305,7 @@ def benchmark_all(
     .. code-block:: python
 
         def test_something(benchmark_all):
-            history = cubed.extensions.history.HistoryCallback()
+            history = cubed.diagnostics.history.HistoryCallback()
             with benchmark_all(history):
                 cubed.compute(*arrs, callbacks=[history])
     
