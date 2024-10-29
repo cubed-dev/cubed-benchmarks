@@ -2,8 +2,8 @@ import os
 import yaml
 
 import cubed
-from cubed.extensions.history import HistoryCallback
-from cubed.extensions.timeline import TimelineVisualizationCallback
+from cubed.diagnostics.history import HistoryCallback
+from cubed.diagnostics.timeline import TimelineVisualizationCallback
 from cubed.spec import spec_from_config
 from cubed import config
 

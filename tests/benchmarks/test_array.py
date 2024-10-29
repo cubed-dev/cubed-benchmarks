@@ -8,7 +8,7 @@ import xarray as xr
 import cubed
 import cubed.random
 from cubed.core.optimization import multiple_inputs_optimize_dag, simple_optimize_dag
-from cubed.extensions.rich import RichProgressBar
+from cubed.diagnostics.rich import RichProgressBar
 
 from ..utils import run
 
@@ -47,9 +47,7 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
     quad = ds**2
     quad["uv"] = ds.anom_u * ds.anom_v
     print(quad)
-    result = quad.mean(
-        "time", skipna=False, use_new_impl=True, split_every=10
-    )
+    result = quad.mean("time", skipna=False, split_every=10)
 
     if optimizer == "new-optimizer":
         opt_fn = partial(multiple_inputs_optimize_dag, max_total_num_input_blocks=20)
