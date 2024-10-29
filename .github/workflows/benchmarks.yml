@@ -1,7 +1,7 @@
 name: Benchmarks
 
 on:
-  schedule:
+  # schedule:
     # Mon-Fri at 04:39 UTC, see https://crontab.guru/
     # Currently disabled since benchmarks can be run on demand
     # - cron: "39 4 * * 1-5"
