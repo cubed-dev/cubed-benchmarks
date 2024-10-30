@@ -1,0 +1,7 @@
+# This is an addition to ci/environment.yml, which upgrades cubed to the git tip.
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - pip:
+    - git+https://github.com/cubed-dev/cubed.git#egg=cubed[diagnostics]
