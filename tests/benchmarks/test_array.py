@@ -6,11 +6,21 @@ import pytest
 import xarray as xr
 
 import cubed
+import cubed as xp
 import cubed.random
 from cubed.core.optimization import multiple_inputs_optimize_dag, simple_optimize_dag
 from cubed.diagnostics.rich import RichProgressBar
 
 from ..utils import run
+
+def test_measure_reserved_mem(runtime):
+    spec = runtime
+
+    if spec.executor.name in ("single-threaded", "threads"):
+        pytest.skip(f"Don't measure reserved memory on {spec.executor.name}")
+
+    reserved_memory = cubed.measure_reserved_mem(executor=spec.executor, work_dir=spec.work_dir)
+    print("reserved memory", reserved_memory)
 
 
 @pytest.mark.parametrize("optimizer", ["new-optimizer"])
@@ -88,5 +98,49 @@ def test_quadratic_means_xarray(tmp_path, runtime, benchmark_all, optimizer, t_l
         try:
             fs, _, _ = fsspec.get_fs_token_paths(path)
             fs.rm(path, recursive=True)
+        except FileNotFoundError:
+            pass
+
+
+@pytest.mark.skip(reason="Skipping due to large computation")
+def test_rechunk_era5(tmp_path, runtime, benchmark_all):
+    spec = runtime
+
+    if spec.executor.name in ("single-threaded", "threads"):
+        pytest.skip(f"Don't run large computation on {spec.executor.name}")
+
+    # from https://github.com/pangeo-data/rechunker/pull/89
+    shape = (350640, 721, 1440)
+    source_chunks = (31, 721, 1440)
+    target_chunks = (350640, 10, 10)
+
+    # set the random seed to ensure deterministic results
+    random.seed(42)
+
+    # create zarr test data (not timed)
+    a = cubed.random.random(shape, dtype=xp.float32, chunks=source_chunks, spec=spec)
+    path = f"{spec.work_dir}/a.zarr"
+    cubed.store([a], [path], compute_arrays_in_parallel=True, callbacks=[RichProgressBar()])
+
+    a = cubed.from_zarr(path, spec=spec)
+    result = a.rechunk(chunks=target_chunks, use_new_impl=True)
+
+    result.visualize(filename=tmp_path / f"rechunk_era5")
+
+    try:
+        # time only the computing of the result
+        run(
+            result,
+            executor=spec.executor,
+            benchmarks=benchmark_all,
+            callbacks=[RichProgressBar()],
+            _return_in_memory_array=False,  # don't load result into memory!
+        )
+    finally:
+        # delete zarr intermediate data (not timed)
+        try:
+            work_dir = spec.work_dir
+            fs, _, _ = fsspec.get_fs_token_paths(work_dir)
+            fs.rm(work_dir, recursive=True)
         except FileNotFoundError:
             pass
